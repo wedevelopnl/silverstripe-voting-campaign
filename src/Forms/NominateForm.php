@@ -65,5 +65,3 @@ class NominateForm extends Form
         return $this->controller->redirectBack();
     }
 }
-
-//Git module
