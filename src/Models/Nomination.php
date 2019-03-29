@@ -3,6 +3,7 @@
 namespace TheWebmen\VotingCampaign\Models;
 
 use SilverStripe\AssetAdmin\Forms\UploadField;
+use SilverStripe\Forms\GridField\GridFieldConfig_RecordViewer;
 use SilverStripe\Assets\Image;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\ORM\DataObject;
@@ -35,6 +36,10 @@ class Nomination extends DataObject
         'Campaign' => VotingCampaign::class
     ];
 
+    private static $has_many = [
+        'Votes' => Vote::class
+    ];
+
     private static $owns = [
         'Photo'
     ];
@@ -42,7 +47,8 @@ class Nomination extends DataObject
     private static $summary_fields = [
         'Name',
         'Status',
-        'Campaign.Title' => 'Campaign'
+        'Campaign.Title' => 'Campaign',
+        'Votes.Count' => 'Num votes'
     ];
 
     public function getCMSFields()
@@ -56,6 +62,13 @@ class Nomination extends DataObject
         /** @var UploadField $potoField */
         $potoField = $fields->dataFieldByName('Photo');
         $potoField->setFolderName('VotingCampaignNominations');
+
+        /** @var GridField $votesField */
+        $votesField = $fields->dataFieldByName('Votes');
+        if ($votesField) {
+            $votesField->setConfig(GridFieldConfig_RecordViewer::create());
+        }
+
         return $fields;
     }
 }

@@ -1,3 +1,7 @@
 ---
 Name: voting-campaign
 ---
+
+SilverStripe\Control\Director:
+  rules:
+    'confirmvote/$Hash!': 'TheWebmen\VotingCampaign\Controllers\ConfirmVoteController'

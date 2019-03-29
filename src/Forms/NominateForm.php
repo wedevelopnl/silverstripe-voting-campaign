@@ -44,6 +44,11 @@ class NominateForm extends Form
 
     public function handle(array $data, Form $form)
     {
+        if ($this->controller->Campaign()->dbObject('NominationClosingDateTime')->InPast()) {
+            $this->sessionMessage(_t(__CLASS__ . '.NOMINATION_CLOSED', 'Nominations are closed'), 'bad');
+            return $this->controller->redirectBack();
+        }
+
         $photo = null;
         if (array_key_exists('Photo', $data)) {
             $upload = new Upload();
