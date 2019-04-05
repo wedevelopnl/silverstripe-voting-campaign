@@ -3,17 +3,21 @@
 namespace TheWebmen\VotingCampaign\Models;
 
 use SilverStripe\AssetAdmin\Forms\UploadField;
+use SilverStripe\Forms\CheckboxSetField;
+use SilverStripe\Forms\FileField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RecordViewer;
-use SilverStripe\Assets\Image;
+use SilverStripe\Assets\File;
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\OptionsetField;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\View\ArrayData;
 
 /**
- * @property string $Name
+ * @property string $FirstName
+ * @property string $Surname
  * @property string $EmailAddress
- * @property string $Text
+ * @property string $ExtraFieldsData
  * @property string $Status
- * @method Image Photo()
  * @method VotingCampaign Campaign()
  */
 class Nomination extends DataObject
@@ -26,13 +30,13 @@ class Nomination extends DataObject
 
     private static $db = [
         'Status' => 'Varchar',
-        'Name' => 'Varchar',
+        'FirstName' => 'Varchar',
+        'Surname' => 'Varchar',
         'EmailAddress' => 'Varchar(255)',
-        'Text' => 'Text'
+        'ExtraFieldsData' => 'Text'
     ];
 
     private static $has_one = [
-        'Photo' => Image::class,
         'Campaign' => VotingCampaign::class
     ];
 
@@ -40,12 +44,9 @@ class Nomination extends DataObject
         'Votes' => Vote::class
     ];
 
-    private static $owns = [
-        'Photo'
-    ];
-
     private static $summary_fields = [
-        'Name',
+        'FirstName',
+        'Surname',
         'Status',
         'Campaign.Title' => 'Campaign',
         'Votes.Count' => 'Num votes'
@@ -59,9 +60,6 @@ class Nomination extends DataObject
             self::STATUS_APPROVED => _t(__CLASS__ . '.STATUS_APPROVED', 'Approved'),
             self::STATUS_DISAPPROVED => _t(__CLASS__ . '.STATUS_DISAPPROVED', 'Disapproved')
         ]));
-        /** @var UploadField $potoField */
-        $potoField = $fields->dataFieldByName('Photo');
-        $potoField->setFolderName('VotingCampaignNominations');
 
         /** @var GridField $votesField */
         $votesField = $fields->dataFieldByName('Votes');
@@ -69,6 +67,61 @@ class Nomination extends DataObject
             $votesField->setConfig(GridFieldConfig_RecordViewer::create());
         }
 
+        $fields->removeByName('ExtraFieldsData');
+        if ($this->ExtraFieldsData) {
+            $extraFieldsData = json_decode($this->ExtraFieldsData, true);
+            foreach($extraFieldsData as $fieldName => $fieldData) {
+                $fieldType = $fieldData['fieldClass'];
+                if ($fieldType === FileField::class){
+                    $fieldData['value'] = File::get()->byId($fieldData['value']);
+                    $fieldType = $fieldData['fieldClass'] = UploadField::class;
+                }
+                $field = new $fieldType($fieldName, null);
+                if ($fieldType === OptionsetField::class || $fieldType === CheckboxSetField::class) {
+                    $field->setSource(is_array($fieldData['value']) ? $fieldData['value'] : [$fieldData['value'] => $fieldData['value']]);
+                }
+                $field->setValue($fieldData['value']);
+                $field->setReadOnly(true);
+                $field->setDisabled(true);
+                $fields->addFieldToTab('Root.ExtraFields', $field);
+            }
+        }
+
         return $fields;
+    }
+
+    public function onBeforeDelete()
+    {
+        parent::onBeforeDelete();
+        $extraFields = $this->ParsedExtraFieldsData();
+        if ($this->ExtraFieldsData) {
+            $extraFieldsData = json_decode($this->ExtraFieldsData, true);
+            foreach($extraFieldsData as $fieldName => $fieldData) {
+                $fieldType = $fieldData['fieldClass'];
+                if ($fieldType === FileField::class){
+                    $file = File::get()->byId($fieldData['value']);
+                    if ($file){
+                        $file->delete();
+                    }
+                }
+            }
+        }
+    }
+
+    public function ParsedExtraFieldsData()
+    {
+        if (!$this->ExtraFieldsData) {
+            return null;
+        }
+        $extraFieldsData = json_decode($this->ExtraFieldsData, true);
+        $out = [];
+        foreach($extraFieldsData as $fieldName => $fieldData) {
+            $fieldType = $fieldData['fieldClass'];
+            if ($fieldType === FileField::class){
+                $fieldData['value'] = File::get()->byId($fieldData['value']);
+            }
+            $out[$fieldName] = $fieldData['value'];
+        }
+        return new ArrayData();
     }
 }

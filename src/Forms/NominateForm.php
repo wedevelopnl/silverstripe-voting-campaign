@@ -2,7 +2,7 @@
 
 namespace TheWebmen\VotingCampaign\Forms;
 
-use SilverStripe\Assets\Image;
+use SilverStripe\Assets\File;
 use SilverStripe\Assets\Upload;
 use SilverStripe\Control\RequestHandler;
 use SilverStripe\Forms\FieldList;
@@ -23,10 +23,9 @@ class NominateForm extends Form
         $name = 'NominateForm'
     ) {
         $fields = FieldList::create([
-            TextField::create('Name', _t(__CLASS__ . '.NAME', 'Name')),
-            EmailField::create('EmailAddress', _t(__CLASS__ . '.EMAIL_ADDRESS', 'Email address')),
-            FileField::create('Photo', _t(__CLASS__ . '.PHOTO', 'Photo')),
-            TextareaField::create('Text', _t(__CLASS__ . '.TEXT', 'Text'))
+            TextField::create('FirstName', _t(__CLASS__ . '.FIRST_NAME', 'Firstname')),
+            TextField::create('Surname', _t(__CLASS__ . '.SURNAME', 'Surname')),
+            EmailField::create('EmailAddress', _t(__CLASS__ . '.EMAIL_ADDRESS', 'Email address'))
         ]);
 
         $actions = FieldList::create([
@@ -34,10 +33,12 @@ class NominateForm extends Form
         ]);
 
         $validator = RequiredFields::create([
-            'Name',
-            'EmailAddress',
-            'Text'
+            'FirstName',
+            'Surname',
+            'EmailAddress'
         ]);
+
+        $this->extend('UpdateForm', $controller, $fields, $actions, $validator);
 
         parent::__construct($controller, $name, $fields, $actions, $validator);
     }
@@ -49,21 +50,46 @@ class NominateForm extends Form
             return $this->controller->redirectBack();
         }
 
-        $photo = null;
-        if (array_key_exists('Photo', $data)) {
-            $upload = new Upload();
-            $photo = new Image();
-            $upload->loadIntoFile($data['Photo'], $photo, 'VotingCampaignNominations');
-        }
-
         $nomination = new Nomination([
-            'Name' => $data['Name'],
+            'FirstName' => $data['FirstName'],
+            'Surname' => $data['Surname'],
             'EmailAddress' => $data['EmailAddress'],
-            'Text' => $data['Text'],
             'Status' => Nomination::STATUS_NEW,
-            'CampaignID' => $this->controller->CampaignID,
-            'PhotoID' => $photo ? $photo->ID : null,
+            'CampaignID' => $this->controller->CampaignID
         ]);
+
+        unset($data['FirstName']);
+        unset($data['Surname']);
+        unset($data['EmailAddress']);
+        unset($data['SecurityID']);
+        unset($data['action_handle']);
+        unset($data['MAX_FILE_SIZE']);
+
+        $json = [];
+        foreach ($data as $extraFieldName => $extraField) {
+            $fieldClass = get_class($form->Fields()->dataFieldByName($extraFieldName));
+            if (!is_array($extraField) || !array_key_exists('tmp_name', $extraField)) {
+                $json[$extraFieldName] = [
+                    'value' => $extraField,
+                    'fieldClass' => $fieldClass
+                ];
+                continue;
+            }
+            if (empty($extraField['tmp_name'])) {
+                continue;
+            }
+            $upload = new Upload();
+            $file = new File();
+            $upload->loadIntoFile($extraField, $file, 'VotingCampaignNominations');
+            $json[$extraFieldName] = [
+                'value' => $file->ID,
+                'fieldClass' => $fieldClass
+            ];
+        }
+        $nomination->ExtraFieldsData = json_encode($json);
+
+        $this->extend('BeforeFinishHandle', $data, $nomination, $form);
+
         $nomination->write();
 
         $this->sessionMessage(_t(__CLASS__ . '.NOMINATION_SUCCESSFUL', 'Your nomination is successful'), 'good');
