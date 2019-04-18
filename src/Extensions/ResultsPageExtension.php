@@ -30,7 +30,7 @@ class ResultsPageExtension extends DataExtension {
         $totalVotes = $this->TotalVotes();
         $out = new ArrayList();
         foreach ($nominations as $nomination) {
-            $numVotes = $nomination->Votes()->filter('Status', Vote::STATUS_CONFIRMED)->Count();
+            $numVotes = $nomination->Votes()->filter('Status', Vote::STATUS_CONFIRMED)->sum('Weight');
             $percentage = $numVotes === 0 ? 0 : round(($numVotes / $totalVotes) * 100);
             $out->push(new ArrayData([
                 'NumVotes' => $numVotes,
@@ -43,6 +43,8 @@ class ResultsPageExtension extends DataExtension {
 
     public function TotalVotes()
     {
-        return $this->owner->Campaign()->Votes()->filter('Status', Vote::STATUS_CONFIRMED)->Count();
+        /** @var VotingCampaign $campaign */
+        $campaign = $this->owner->Campaign();
+        return $campaign->Votes()->filter('Status', Vote::STATUS_CONFIRMED)->sum('Weight');
     }
 }

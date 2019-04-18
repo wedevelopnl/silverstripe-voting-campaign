@@ -52,6 +52,14 @@ class Nomination extends DataObject
         'Votes.Count' => 'Num votes'
     ];
 
+    public function getTitle()
+    {
+        if ($this->FirstName) {
+            return $this->FirstName . ' ' . $this->Surname;
+        }
+        return parent::getTitle();
+    }
+
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();

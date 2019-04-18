@@ -15,6 +15,7 @@ use SilverStripe\Control\Email\Email;
  * @property string $Hash
  * @method VotingCampaign Campaign()
  * @method Nomination Nomination()
+ * @method VotingCode VotingCode()
  */
 class Vote extends DataObject
 {
@@ -26,12 +27,14 @@ class Vote extends DataObject
     private static $db = [
         'Email' => 'Varchar(255)',
         'Status' => 'Varchar',
-        'Hash' => 'Varchar(255)'
+        'Hash' => 'Varchar(255)',
+        'Weight' => 'Int'
     ];
 
     private static $has_one = [
         'Campaign' => VotingCampaign::class,
-        'Nomination' => Nomination::class
+        'Nomination' => Nomination::class,
+        'VotingCode' => VotingCode::class
     ];
 
     private static $summary_fields = [
