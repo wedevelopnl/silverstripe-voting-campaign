@@ -64,7 +64,7 @@ class VotingCode extends DataObject
 
         $vote = $this->Vote();
         if ($vote && $vote->exists()) {
-            $fields->addFieldToTab('Root.Main', new ReadonlyField('Vote', 'Vote', $vote->ID));
+            $fields->addFieldToTab('Root.Main', new ReadonlyField('VoteID', 'Vote', $vote->ID));
         }
 
         return $fields;
