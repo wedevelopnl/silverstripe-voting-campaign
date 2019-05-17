@@ -46,6 +46,12 @@ class VotingForm extends Form
         }
 
         parent::__construct($controller, $name, $fields, $actions, $validator);
+        
+        if ($code = $controller->getRequest()->getVar('code')) {
+            $this->loadDataFrom([
+                'Code' => $code
+            ]);
+        }
     }
 
     public function handle(array $data, Form $form)
