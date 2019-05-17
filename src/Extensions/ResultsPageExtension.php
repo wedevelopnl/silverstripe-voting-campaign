@@ -31,7 +31,7 @@ class ResultsPageExtension extends DataExtension {
         $out = new ArrayList();
         foreach ($nominations as $nomination) {
             $numVotes = $nomination->Votes()->filter('Status', Vote::STATUS_CONFIRMED)->sum('Weight');
-            $percentage = $numVotes === 0 ? 0 : round(($numVotes / $totalVotes) * 100);
+            $percentage = !$numVotes ? 0 : round(($numVotes / $totalVotes) * 100);
             $out->push(new ArrayData([
                 'NumVotes' => $numVotes,
                 'Percentage' => $percentage,
