@@ -100,14 +100,18 @@ class VotingForm extends Form
             'CampaignID' => $campaign->ID,
             'NominationID' => $data['Choice'],
             'Email' => $data['Email'],
-            'Status' => Vote::STATUS_UNCONFIRMED,
+            'Status' => $campaign->EnableVoteConfirmation ? Vote::STATUS_UNCONFIRMED : Vote::STATUS_CONFIRMED,
             'Weight' => $code ? $code->Weight : 1,
             'VotingCodeID' => $code ? $code->ID : null
         ]);
         $vote->write();
-        $vote->sendConfirmEmail($campaign->ConfirmEmailSender, $campaign->ConfirmEmailSubject);
-
-        $this->sessionMessage(_t(__CLASS__ . '.VOTE_SUCCESSFUL', 'An email is send to your email address to confirm your vote'), 'good');
+        if ($campaign->EnableVoteConfirmation) {
+            $vote->sendConfirmEmail($campaign->ConfirmEmailSender, $campaign->ConfirmEmailSubject);
+            $this->sessionMessage(_t(__CLASS__ . '.VOTE_SUCCESSFUL', 'An email is send to your email address to confirm your vote'), 'good');
+        }else {
+            $this->sessionMessage(_t(__CLASS__ . '.VOTE_SUCCESSFUL_CONFIRMED', 'Thank you for voting'), 'good');
+        }
+        
         return $this->controller->redirectBack();
     }
 }
