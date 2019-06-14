@@ -33,7 +33,8 @@ class VotingCampaign extends DataObject {
         'ResultsVisibleDateTime' => 'DBDatetime',
         'ConfirmEmailSender' => 'Varchar(255)',
         'ConfirmEmailSubject' => 'Varchar(255)',
-        'CampaignUsesCodes' => 'Boolean'
+        'CampaignUsesCodes' => 'Boolean',
+        'EnableVoteConfirmation' => 'Boolean'
     ];
 
     private static $has_many = [
