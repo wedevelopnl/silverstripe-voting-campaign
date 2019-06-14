@@ -49,7 +49,8 @@ class Nomination extends DataObject
         'Surname',
         'Status',
         'Campaign.Title' => 'Campaign',
-        'Votes.Count' => 'Num votes'
+        'Votes.Count' => 'Num votes',
+        'VotesWithWeight' => 'Votes with weight'
     ];
 
     public function getTitle()
@@ -58,6 +59,14 @@ class Nomination extends DataObject
             return $this->FirstName . ' ' . $this->Surname;
         }
         return parent::getTitle();
+    }
+    
+    public function getVotesWithWeight()
+    {
+        return Vote::get()->filter([
+            'Status' => Vote::STATUS_CONFIRMED,
+            'NominationID' => $this->ID
+        ])->sum('Weight');
     }
 
     public function getCMSFields()
