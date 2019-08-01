@@ -2,6 +2,7 @@
 
 namespace TheWebmen\VotingCampaign\Forms;
 
+use SilverStripe\AssetAdmin\Controller\AssetAdmin;
 use SilverStripe\Assets\File;
 use SilverStripe\Assets\Upload;
 use SilverStripe\Control\RequestHandler;
@@ -80,6 +81,7 @@ class NominateForm extends Form
             }
             $upload = new Upload();
             $upload->loadIntoFile($extraField, null, 'VotingCampaignNominations');
+            AssetAdmin::singleton()->getObjectFromData($upload->getFile());
             $json[$extraFieldName] = [
                 'value' => $upload->getFile()->ID,
                 'fieldClass' => $fieldClass
