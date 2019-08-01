@@ -12,6 +12,7 @@ use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\OptionsetField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\View\ArrayData;
+use SilverStripe\Forms\CompositeField;
 
 /**
  * @property string $FirstName
