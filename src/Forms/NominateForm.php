@@ -79,10 +79,9 @@ class NominateForm extends Form
                 continue;
             }
             $upload = new Upload();
-            $file = new File();
-            $upload->loadIntoFile($extraField, $file, 'VotingCampaignNominations');
+            $upload->loadIntoFile($extraField, null, 'VotingCampaignNominations');
             $json[$extraFieldName] = [
-                'value' => $file->ID,
+                'value' => $upload->getFile()->ID,
                 'fieldClass' => $fieldClass
             ];
         }
