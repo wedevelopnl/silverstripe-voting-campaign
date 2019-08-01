@@ -8,6 +8,7 @@ use SilverStripe\Forms\FileField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RecordViewer;
 use SilverStripe\Assets\File;
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\OptionsetField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\View\ArrayData;
@@ -100,6 +101,12 @@ class Nomination extends DataObject
                 $field->setValue($fieldData['value']);
                 $field->setReadOnly(true);
                 $field->setDisabled(true);
+                if ($fieldType === UploadField::class) {
+                    $field = new CompositeField([
+                        $field,
+                        new LiteralField($fieldName . '-link', "<a href='{$fieldData['value']->CMSEditLink()}' target='_blank'>Open file</a>")
+                    ]);
+                }
                 $fields->addFieldToTab('Root.ExtraFields', $field);
             }
         }
