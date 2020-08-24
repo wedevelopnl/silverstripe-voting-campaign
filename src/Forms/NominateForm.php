@@ -93,7 +93,12 @@ class NominateForm extends Form
 
         $nomination->write();
 
-        $this->sessionMessage(_t(__CLASS__ . '.NOMINATION_SUCCESSFUL', 'Your nomination is successful'), 'good');
+        if ($this->controller->Campaign()->NominateFormSuccessText) {
+            $this->sessionMessage($this->controller->Campaign()->NominateFormSuccessText, 'good');
+        } else {
+            $this->sessionMessage(_t(__CLASS__ . '.NOMINATION_SUCCESSFUL', 'Your nomination is successful'), 'good');
+        }
+
         return $this->controller->redirectBack();
     }
 }

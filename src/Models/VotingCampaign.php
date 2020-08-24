@@ -6,6 +6,7 @@ use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
 use SilverStripe\Forms\GridField\GridFieldConfig_RecordViewer;
+use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\HasManyList;
@@ -18,6 +19,7 @@ use SilverStripe\ORM\HasManyList;
  * @property string $ConfirmEmailSender
  * @property string $ConfirmEmailSubject
  * @property bool $CampaignUsesCodes
+ * @property string $NominateFormSuccessText
  * @method HasManyList Nominations()
  * @method HasManyList Votes()
  * @method HasManyList VotingCodes()
@@ -34,7 +36,8 @@ class VotingCampaign extends DataObject {
         'ConfirmEmailSender' => 'Varchar(255)',
         'ConfirmEmailSubject' => 'Varchar(255)',
         'CampaignUsesCodes' => 'Boolean',
-        'EnableVoteConfirmation' => 'Boolean'
+        'EnableVoteConfirmation' => 'Boolean',
+        'NominateFormSuccessText' => 'Text',
     ];
 
     private static $has_many = [
@@ -52,6 +55,9 @@ class VotingCampaign extends DataObject {
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
+
+        $fields->addFieldToTab('Root.Main', TextField::create('NominateFormSuccessText', 'Nominate form success text'));
+
         /** @var GridField $nominationsField */
         $nominationsField = $fields->dataFieldByName('Nominations');
         if ($nominationsField) {
