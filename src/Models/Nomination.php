@@ -3,6 +3,7 @@
 namespace TheWebmen\VotingCampaign\Models;
 
 use SilverStripe\AssetAdmin\Forms\UploadField;
+use SilverStripe\Control\Email\Email;
 use SilverStripe\Forms\CheckboxSetField;
 use SilverStripe\Forms\FileField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RecordViewer;
@@ -62,7 +63,7 @@ class Nomination extends DataObject
         }
         return parent::getTitle();
     }
-    
+
     public function getVotesWithWeight()
     {
         return Vote::get()->filter([
@@ -148,5 +149,18 @@ class Nomination extends DataObject
             $out[$fieldName] = $fieldData['value'];
         }
         return new ArrayData();
+    }
+
+    public function sendEmail($from, $subject)
+    {
+        $email = Email::create()
+            ->setHTMLTemplate('TheWebmen\\VotingCampaign\\Email\\NominationEmail')
+            ->setData([
+                'Nomination' => $this
+            ])
+            ->setFrom($from)
+            ->setTo($this->Email)
+            ->setSubject($subject);
+        $email->send();
     }
 }

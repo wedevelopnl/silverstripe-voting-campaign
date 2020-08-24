@@ -16,6 +16,7 @@ use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\FileField;
 use SilverStripe\Forms\Validator;
 use TheWebmen\VotingCampaign\Models\Nomination;
+use TheWebmen\VotingCampaign\Models\VotingCampaign;
 
 class NominateForm extends Form
 {
@@ -46,7 +47,9 @@ class NominateForm extends Form
 
     public function handle(array $data, Form $form)
     {
-        if ($this->controller->Campaign()->dbObject('NominationClosingDateTime')->InPast()) {
+        /** @var VotingCampaign $campaign */
+        $campaign = $this->controller->Campaign();
+        if ($campaign->dbObject('NominationClosingDateTime')->InPast()) {
             $this->sessionMessage(_t(__CLASS__ . '.NOMINATION_CLOSED', 'Nominations are closed'), 'bad');
             return $this->controller->redirectBack();
         }
@@ -56,7 +59,7 @@ class NominateForm extends Form
             'Surname' => $data['Surname'],
             'EmailAddress' => $data['EmailAddress'],
             'Status' => Nomination::STATUS_NEW,
-            'CampaignID' => $this->controller->CampaignID
+            'CampaignID' => $campaign->ID
         ]);
 
         unset($data['FirstName']);
@@ -93,8 +96,12 @@ class NominateForm extends Form
 
         $nomination->write();
 
-        if ($this->controller->Campaign()->NominateFormSuccessText) {
-            $this->sessionMessage($this->controller->Campaign()->NominateFormSuccessText, 'good');
+        if ($campaign->EnableNominationEmail) {
+            $nomination->sendEmail($campaign->NominationEmailFrom, $campaign->NominationEmailSubject);
+        }
+
+        if ($campaign->NominateFormSuccessText) {
+            $this->sessionMessage($campaign->NominateFormSuccessText, 'good');
         } else {
             $this->sessionMessage(_t(__CLASS__ . '.NOMINATION_SUCCESSFUL', 'Your nomination is successful'), 'good');
         }

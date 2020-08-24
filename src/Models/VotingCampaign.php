@@ -2,6 +2,7 @@
 
 namespace TheWebmen\VotingCampaign\Models;
 
+use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
@@ -10,6 +11,7 @@ use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\HasManyList;
+use UncleCheese\DisplayLogic\Forms\Wrapper;
 
 /**
  * @property string $Title
@@ -20,6 +22,9 @@ use SilverStripe\ORM\HasManyList;
  * @property string $ConfirmEmailSubject
  * @property bool $CampaignUsesCodes
  * @property string $NominateFormSuccessText
+ * @property bool $EnableNominationEmail
+ * @property string $NominationEmailFrom
+ * @property string $NominationEmailSubject
  * @method HasManyList Nominations()
  * @method HasManyList Votes()
  * @method HasManyList VotingCodes()
@@ -38,6 +43,9 @@ class VotingCampaign extends DataObject {
         'CampaignUsesCodes' => 'Boolean',
         'EnableVoteConfirmation' => 'Boolean',
         'NominateFormSuccessText' => 'Text',
+        'EnableNominationEmail' => 'Boolean',
+        'NominationEmailFrom' => 'Varchar',
+        'NominationEmailSubject' => 'Varchar',
     ];
 
     private static $has_many = [
@@ -55,6 +63,8 @@ class VotingCampaign extends DataObject {
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
+
+        $fields->removeByName(['NominationEmailFrom', 'NominationEmailSubject']);
 
         $fields->addFieldToTab('Root.Main', TextField::create('NominateFormSuccessText', 'Nominate form success text'));
 
@@ -76,6 +86,14 @@ class VotingCampaign extends DataObject {
             $votingCodesField = new GridField('VotingCodes', 'Codes', $this->VotingCodes(), $votingCodesConfig);
             $fields->addFieldToTab('Root.Codes', $votingCodesField);
         }
+
+        $fields->addFieldsToTab('Root.Email', [
+            CheckboxField::create('EnableNominationEmail', 'Enable nomination email'),
+            Wrapper::create([
+                TextField::create('NominationEmailFrom', 'Nomination email from'),
+                TextField::create('NominationEmailSubject', 'Nomination email subject'),
+            ])->displayIf('EnableNominationEmail')->isChecked()->end()
+        ]);
 
         return $fields;
     }
