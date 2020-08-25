@@ -123,9 +123,9 @@ class Nomination extends DataObject
         if ($this->ExtraFieldsData) {
             $extraFieldsData = json_decode($this->ExtraFieldsData, true);
             foreach($extraFieldsData as $fieldData) {
-                $fieldType = $fieldData['FieldClass'];
+                $fieldType = $fieldData['fieldClass'];
                 if ($fieldType === FileField::class){
-                    $file = File::get()->byId($fieldData['Value']);
+                    $file = File::get()->byId($fieldData['value']);
                     if ($file){
                         $file->delete();
                     }
