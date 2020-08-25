@@ -96,8 +96,20 @@ class NominateForm extends Form
 
         $nomination->write();
 
+        if ($campaign->EnableNominationAdminEmail) {
+            $nomination->sendEmail(
+                $campaign->NominationAdminEmailFrom,
+                $campaign->NominationAdminEmailTo,
+                $campaign->NominationAdminEmailSubject
+            );
+        }
+
         if ($campaign->EnableNominationEmail) {
-            $nomination->sendEmail($campaign->NominationEmailFrom, $campaign->NominationEmailSubject);
+            $nomination->sendEmail(
+                $campaign->NominationEmailFrom,
+                $nomination->EmailAddress,
+                $campaign->NominationEmailSubject
+            );
         }
 
         if ($campaign->NominateFormSuccessText) {

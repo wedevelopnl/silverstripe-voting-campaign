@@ -155,7 +155,7 @@ class Nomination extends DataObject
         return $out;
     }
 
-    public function sendEmail($from, $subject)
+    public function sendEmail($from, $to, $subject)
     {
         $email = Email::create()
             ->setHTMLTemplate('TheWebmen\\VotingCampaign\\Email\\NominationEmail')
@@ -163,7 +163,7 @@ class Nomination extends DataObject
                 'Nomination' => $this
             ])
             ->setFrom($from)
-            ->setTo($this->Email)
+            ->setTo($to)
             ->setSubject($subject);
         $email->send();
     }

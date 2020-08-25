@@ -25,6 +25,10 @@ use UncleCheese\DisplayLogic\Forms\Wrapper;
  * @property bool $EnableNominationEmail
  * @property string $NominationEmailFrom
  * @property string $NominationEmailSubject
+ * @property bool $EnableNominationAdminEmail
+ * @property string $NominationAdminEmailFrom
+ * @property string $NominationAdminEmailTo
+ * @property string $NominationAdminEmailSubject
  * @method HasManyList Nominations()
  * @method HasManyList Votes()
  * @method HasManyList VotingCodes()
@@ -46,6 +50,10 @@ class VotingCampaign extends DataObject {
         'EnableNominationEmail' => 'Boolean',
         'NominationEmailFrom' => 'Varchar',
         'NominationEmailSubject' => 'Varchar',
+        'EnableNominationAdminEmail' => 'Boolean',
+        'NominationAdminEmailFrom' => 'Varchar',
+        'NominationAdminEmailTo' => 'Varchar',
+        'NominationAdminEmailSubject' => 'Varchar',
     ];
 
     private static $has_many = [
@@ -64,7 +72,13 @@ class VotingCampaign extends DataObject {
     {
         $fields = parent::getCMSFields();
 
-        $fields->removeByName(['NominationEmailFrom', 'NominationEmailSubject']);
+        $fields->removeByName([
+            'NominationEmailFrom',
+            'NominationEmailSubject',
+            'NominationAdminEmailFrom',
+            'NominationAdminEmailTo',
+            'NominationAdminEmailSubject',
+        ]);
 
         $fields->addFieldToTab('Root.Main', TextField::create('NominateFormSuccessText', 'Nominate form success text'));
 
@@ -88,11 +102,17 @@ class VotingCampaign extends DataObject {
         }
 
         $fields->addFieldsToTab('Root.Email', [
+            CheckboxField::create('EnableNominationAdminEmail', 'Enable nomination admin email'),
+            Wrapper::create([
+                TextField::create('NominationAdminEmailFrom', 'Nomination admin email from'),
+                TextField::create('NominationAdminEmailTo', 'Nomination admin email from'),
+                TextField::create('NominationAdminEmailSubject', 'Nomination admin email subject'),
+            ])->displayIf('EnableNominationAdminEmail')->isChecked()->end(),
             CheckboxField::create('EnableNominationEmail', 'Enable nomination email'),
             Wrapper::create([
                 TextField::create('NominationEmailFrom', 'Nomination email from'),
                 TextField::create('NominationEmailSubject', 'Nomination email subject'),
-            ])->displayIf('EnableNominationEmail')->isChecked()->end()
+            ])->displayIf('EnableNominationEmail')->isChecked()->end(),
         ]);
 
         return $fields;
