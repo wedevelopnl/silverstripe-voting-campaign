@@ -11,6 +11,7 @@ use SilverStripe\Assets\File;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\OptionsetField;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\View\ArrayData;
 use SilverStripe\Forms\CompositeField;
@@ -119,13 +120,12 @@ class Nomination extends DataObject
     public function onBeforeDelete()
     {
         parent::onBeforeDelete();
-        $extraFields = $this->ParsedExtraFieldsData();
         if ($this->ExtraFieldsData) {
             $extraFieldsData = json_decode($this->ExtraFieldsData, true);
-            foreach($extraFieldsData as $fieldName => $fieldData) {
-                $fieldType = $fieldData['fieldClass'];
+            foreach($extraFieldsData as $fieldData) {
+                $fieldType = $fieldData['FieldClass'];
                 if ($fieldType === FileField::class){
-                    $file = File::get()->byId($fieldData['value']);
+                    $file = File::get()->byId($fieldData['Value']);
                     if ($file){
                         $file->delete();
                     }
@@ -140,15 +140,19 @@ class Nomination extends DataObject
             return null;
         }
         $extraFieldsData = json_decode($this->ExtraFieldsData, true);
-        $out = [];
+        $out = ArrayList::create();
         foreach($extraFieldsData as $fieldName => $fieldData) {
-            $fieldType = $fieldData['fieldClass'];
-            if ($fieldType === FileField::class){
+            if ($fieldData['fieldClass'] === FileField::class){
                 $fieldData['value'] = File::get()->byId($fieldData['value']);
             }
-            $out[$fieldName] = $fieldData['value'];
+
+            $out->push([
+                'Title' => $fieldName,
+                'FieldClass' => $fieldData['fieldClass'],
+                'Value' => $fieldData['value'],
+            ]);
         }
-        return new ArrayData();
+        return $out;
     }
 
     public function sendEmail($from, $subject)
