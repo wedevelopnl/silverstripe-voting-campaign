@@ -105,7 +105,7 @@ class VotingCampaign extends DataObject {
             CheckboxField::create('EnableNominationAdminEmail', 'Enable nomination admin email'),
             Wrapper::create([
                 TextField::create('NominationAdminEmailFrom', 'Nomination admin email from'),
-                TextField::create('NominationAdminEmailTo', 'Nomination admin email from'),
+                TextField::create('NominationAdminEmailTo', 'Nomination admin email to'),
                 TextField::create('NominationAdminEmailSubject', 'Nomination admin email subject'),
             ])->displayIf('EnableNominationAdminEmail')->isChecked()->end(),
             CheckboxField::create('EnableNominationEmail', 'Enable nomination email'),
